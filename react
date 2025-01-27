@@ -1,0 +1,210 @@
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, Edit, X, Trash } from "lucide-react";
+
+const LegalMindChatbot = () => {
+  const [messages, setMessages] = useState(
+    JSON.parse(localStorage.getItem("chatHistory")) || [
+      { text: "Hello, how can I assist you today?", sender: "LegalMind", timestamp: new Date().toLocaleTimeString() },
+      { text: "I need legal advice.", sender: "user", timestamp: new Date().toLocaleTimeString() }
+    ]
+  );
+
+  const [input, setInput] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem("chatHistory", JSON.stringify(messages));
+  }, [messages]);
+
+  const handleSend = () => {
+    if (input.trim()) {
+      const newMessage = { text: input, sender: "user", timestamp: new Date().toLocaleTimeString() };
+      setMessages([...messages, newMessage]);
+      setInput("");
+
+      // Simulating bot reply
+      setTimeout(() => {
+        const botMessage = {
+          text: "Thank you for reaching out. How can I help further?",
+          sender: "LegalMind",
+          timestamp: new Date().toLocaleTimeString()
+        };
+        setMessages((prev) => [...prev, botMessage]);
+      }, 1000);
+    }
+  };
+
+  const handleUpload = () => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const fileMessage = {
+          text: `File uploaded: ${file.name}`,
+          sender: "user",
+          timestamp: new Date().toLocaleTimeString()
+        };
+        setMessages((prev) => [...prev, fileMessage]);
+      }
+    };
+    fileInput.click();
+  };
+
+  const handleEdit = (index) => {
+    const newMessage = prompt("Edit your message:", messages[index].text);
+    if (newMessage !== null) {
+      const updatedMessages = messages.map((msg, i) =>
+        i === index ? { ...msg, text: newMessage } : msg
+      );
+      setMessages(updatedMessages);
+    }
+  };
+
+  const handleDelete = (index) => {
+    const updatedMessages = messages.filter((_, i) => i !== index);
+    setMessages(updatedMessages);
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  return (
+    <div className={`${darkMode ? "bg-gray-800" : "bg-gray-900"} min-h-screen flex flex-col`}>
+      {/* Header with Animated Title */}
+      <div className="relative h-16 bg-gray-800 flex items-center justify-center">
+        <motion.div
+          animate={{ x: [0, 20, 40, 20, 0] }}
+          transition={{ repeat: Infinity, duration: 3 }}
+          className="px-4 py-2 bg-[#001c17] rounded-lg shadow-lg"
+        >
+          <motion.h1
+            animate={{ textShadow: [
+              "0px 0px 5px #ffffff",
+              "0px 0px 15px #ffffff",
+              "0px 0px 5px #ffffff"
+            ] }}
+            transition={{ repeat: Infinity, duration: 3 }}
+            className="text-white text-xl font-bold"
+          >
+            LegalMind.ai
+          </motion.h1>
+        </motion.div>
+        <button
+          onClick={toggleDarkMode}
+          className="absolute right-4 text-white bg-gray-700 px-4 py-2 rounded-lg"
+        >
+          {darkMode ? "Light Mode" : "Dark Mode"}
+        </button>
+      </div>
+
+      {/* Main Chat Layout */}
+      <div className="flex flex-grow">
+        {/* Sidebar */}
+        {isSidebarOpen && (
+          <aside className="w-1/4 bg-gray-800 p-4 relative">
+            <button
+              onClick={toggleSidebar}
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-200"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h2 className="text-white font-bold mb-4">Chat History</h2>
+            <ul className="space-y-2">
+              {messages.map((message, index) => (
+                <li
+                  key={index}
+                  className="bg-gray-700 p-3 rounded-lg text-white truncate"
+                >
+                  {message.sender === "user" ? `You: ${message.text}` : `LegalMind: ${message.text}`}
+                  <span className="block text-sm text-gray-400">{message.timestamp}</span>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )}
+        {!isSidebarOpen && (
+          <button
+            onClick={toggleSidebar}
+            className="bg-gray-800 text-white p-2 rounded-lg focus:outline-none"
+          >
+            Open Chat History
+          </button>
+        )}
+
+        {/* Chat Area */}
+        <div className="flex-1 bg-gray-700 p-4 flex flex-col">
+          {/* Messages */}
+          <div className="flex-grow overflow-y-auto space-y-4">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`relative flex ${
+                  message.sender === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <Card
+                  className={`${
+                    message.sender === "user" ? "bg-gray-600" : "bg-gray-800"
+                  } rounded-lg p-3 shadow-lg max-w-xs`}
+                >
+                  <CardContent className="text-white font-bold">
+                    {message.text}
+                    <span className="block text-sm text-gray-400 mt-1">{message.timestamp}</span>
+                  </CardContent>
+                </Card>
+                {message.sender === "user" && (
+                  <div className="absolute top-0 right-0 flex space-x-2 mt-2 mr-2">
+                    <button
+                      onClick={() => handleEdit(index)}
+                      className="text-gray-400 hover:text-gray-200"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(index)}
+                      className="text-gray-400 hover:text-gray-200"
+                    >
+                      <Trash className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Input Section */}
+          <div className="mt-4 flex items-center gap-2">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 p-3 rounded-lg bg-gray-600 text-white border border-gray-500 focus:outline-none"
+            />
+            <Button
+              onClick={handleSend}
+              className="bg-[#001c17] text-white flex items-center justify-center p-3"
+            >
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+            <Button onClick={handleUpload} className="bg-gray-800 text-white p-3">
+              Upload
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LegalMindChatbot;
