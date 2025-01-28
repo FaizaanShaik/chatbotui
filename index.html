@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LegalMind Chatbot</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title">LegalMind.ai</h1>
+      <button id="toggle-theme" class="toggle-theme">Dark Mode</button>
+    </header>
+
+    <!-- Main Content -->
+    <div class="chat-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <button id="toggle-sidebar" class="close-sidebar">×</button>
+        <h2>Chat History</h2>
+        <ul id="chat-history"></ul>
+      </aside>
+
+      <!-- Chat Area -->
+      <main class="chat-area">
+        <div id="chat-messages" class="chat-messages"></div>
+
+        <!-- Input Section -->
+        <div class="chat-input">
+          <input id="message-input" type="text" placeholder="Type your message..." />
+          <button id="send-button">Send</button>
+          <button id="upload-button">Upload</button>
+        </div>
+
+      </main>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
